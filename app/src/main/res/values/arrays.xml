@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="todo_lists">
+        <item>TODO List 1</item>
+        <item>TODO List 2</item>
+    </string-array>
+</resources>
