@@ -106,7 +106,7 @@
                 android:gravity="start"
                 android:hint="Enter List"
                 android:padding="15dp"
-                android:textColor="@color/light"
+                android:textColor="#99ECECEC"
                 android:textColorHint="#99ECECEC"
                 android:textSize="14sp"
                 android:visibility="gone"

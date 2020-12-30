@@ -123,6 +123,7 @@ class MainActivity : AppCompatActivity() {
             if (x < v.getLeft() || x > v.getRight() || y < v.getTop() || y > v.getBottom()) {
                 hideKeyboard()
                 addTodoListItem.visibility = GONE
+                addTodoListItem.text.clear()
             }
         }
         return super.dispatchTouchEvent(ev)
