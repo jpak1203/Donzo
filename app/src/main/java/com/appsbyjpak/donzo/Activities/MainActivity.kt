@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import com.appsbyjpak.donzo.Adapters.NavigationAdapter
+import com.appsbyjpak.donzo.R
 
 
 class MainActivity : AppCompatActivity() {
@@ -24,8 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var addTodoListItem: EditText
     private lateinit var addTodoListButton: Button
     var todoLists = ArrayList<String>()
-    var todoListAdapter: ArrayAdapter<String>? = null
-    var activeTodoList: String? = null
+    var todoListAdapter: NavigationAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,8 +45,9 @@ class MainActivity : AppCompatActivity() {
 
         // Navigation Menu
         mDrawerLayout = findViewById(R.id.drawer_layout)
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
 
-        closeDrawerButton = findViewById<ImageView>(R.id.close_drawer_button)
+        closeDrawerButton = findViewById(R.id.close_drawer_button)
         closeDrawerButton.setOnClickListener {
             mDrawerLayout.closeDrawer(Gravity.LEFT)
         }
@@ -53,24 +55,21 @@ class MainActivity : AppCompatActivity() {
         navigationTodoLists = findViewById(R.id.nav_todo_lists)
 
         todoLists = arrayListOf("TODO List 1", "TODO List 2")
-        todoListAdapter = ArrayAdapter(this,
-                R.layout.navigation_list,
-                R.id.todo_list_item,
-                todoLists)
+        todoListAdapter = NavigationAdapter(this, todoLists, 0)
 
         navigationTodoLists.adapter = todoListAdapter
 
-        if (activeTodoList == null) {
-            navigationTodoLists.setItemChecked(0, true)
-            activeTodoList = navigationTodoLists.adapter.getItem(navigationTodoLists.checkedItemPosition).toString()
-            toolbar.findViewById<TextView>(R.id.toolbar_title).text = activeTodoList
-        }
+        //on first start -- set active list as the first list
+        navigationTodoLists.setItemChecked(0, true)
+        todoListAdapter?.notifyDataSetChanged()
+        toolbar.findViewById<TextView>(R.id.toolbar_title).text = navigationTodoLists.adapter.getItem(0).toString()
 
         navigationTodoLists.onItemClickListener = OnItemClickListener { _, _, position, _ ->
-            mDrawerLayout.closeDrawers()
             navigationTodoLists.setItemChecked(position, true)
-            activeTodoList = navigationTodoLists.adapter.getItem(navigationTodoLists.checkedItemPosition).toString()
-            toolbar.findViewById<TextView>(R.id.toolbar_title).text = activeTodoList
+            todoListAdapter?.activeTodoListIndex = position
+            todoListAdapter?.notifyDataSetChanged()
+            mDrawerLayout.closeDrawers()
+            toolbar.findViewById<TextView>(R.id.toolbar_title).text = navigationTodoLists.adapter.getItem(position).toString()
         }
 
         addTodoListButton = findViewById<Button>(R.id.add_new_list_button)
@@ -82,7 +81,7 @@ class MainActivity : AppCompatActivity() {
             addTodoListItem.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     if (addTodoListItem.text.toString().isNotEmpty()) {
-                        todoListAdapter?.add(addTodoListItem.text.toString())
+                        todoLists?.add(addTodoListItem.text.toString())
                         todoListAdapter?.notifyDataSetChanged()
                         addTodoListItem.visibility = GONE
                         addTodoListItem.text.clear()
