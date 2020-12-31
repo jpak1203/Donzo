@@ -1,8 +1,13 @@
 package com.appsbyjpak.donzo
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.view.*
+import android.util.Log
+import android.view.Gravity
+import android.view.Menu
+import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View.GONE
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -14,8 +19,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import com.appsbyjpak.donzo.Activities.AddTaskActivity
 import com.appsbyjpak.donzo.Adapters.NavigationAdapter
-import com.appsbyjpak.donzo.R
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,13 +33,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var addTodoListButton: Button
     var todoLists = ArrayList<String>()
     var todoListAdapter: NavigationAdapter? = null
+    var position = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        if (savedInstanceState?.getInt("activeList") != null) position = savedInstanceState.getInt("activeList")
+        Log.d("AH", "" + savedInstanceState?.getInt("activeList"))
 
         // Custom Action bar
-        val toolbar: Toolbar = findViewById(R.id.todo_toolbar)
+        val toolbar: Toolbar = findViewById(R.id.main_todo_toolbar)
         setSupportActionBar(toolbar)
 
         val actionbar: ActionBar? = supportActionBar
@@ -60,16 +69,21 @@ class MainActivity : AppCompatActivity() {
         navigationTodoLists.adapter = todoListAdapter
 
         //on first start -- set active list as the first list
-        navigationTodoLists.setItemChecked(0, true)
+        navigationTodoLists.setItemChecked(position, true)
         todoListAdapter?.notifyDataSetChanged()
-        toolbar.findViewById<TextView>(R.id.toolbar_title).text = navigationTodoLists.adapter.getItem(0).toString()
+        toolbar.findViewById<TextView>(R.id.main_toolbar_title).text = navigationTodoLists.adapter.getItem(
+                0
+        ).toString()
 
         navigationTodoLists.onItemClickListener = OnItemClickListener { _, _, position, _ ->
+            this.position = position
             navigationTodoLists.setItemChecked(position, true)
             todoListAdapter?.activeTodoListIndex = position
             todoListAdapter?.notifyDataSetChanged()
             mDrawerLayout.closeDrawers()
-            toolbar.findViewById<TextView>(R.id.toolbar_title).text = navigationTodoLists.adapter.getItem(position).toString()
+            toolbar.findViewById<TextView>(R.id.main_toolbar_title).text = navigationTodoLists.adapter.getItem(
+                    position
+            ).toString()
         }
 
         addTodoListButton = findViewById<Button>(R.id.add_new_list_button)
@@ -91,6 +105,13 @@ class MainActivity : AppCompatActivity() {
                 false
             }
         }
+
+        var fab = findViewById<FloatingActionButton>(R.id.fab)
+        fab.setOnClickListener {
+            val myIntent = Intent(this, AddTaskActivity::class.java)
+            startActivity(myIntent)
+        }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

@@ -4,4 +4,11 @@
         <item>TODO List 1</item>
         <item>TODO List 2</item>
     </string-array>
+
+    <string-array name="durations">
+        <item>day(s)</item>
+        <item>week(s)</item>
+        <item>month(s)</item>
+        <item>year(s)</item>
+    </string-array>
 </resources>

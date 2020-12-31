@@ -15,7 +15,7 @@
 
         <!-- Toolbar -->
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/todo_toolbar"
+            android:id="@+id/main_todo_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/dark"
@@ -27,7 +27,7 @@
             app:titleTextColor="#fff" >
 
             <TextView
-                android:id="@+id/toolbar_title"
+                android:id="@+id/main_toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Toolbar Title"
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/todo_toolbar" />
+            app:layout_constraintTop_toBottomOf="@+id/main_todo_toolbar" />
 
         <!-- Floating Action Button -->
         <androidx.coordinatorlayout.widget.CoordinatorLayout
