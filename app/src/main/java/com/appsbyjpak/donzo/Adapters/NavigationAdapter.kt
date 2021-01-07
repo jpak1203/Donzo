@@ -14,7 +14,7 @@ import com.daimajia.swipe.adapters.ArraySwipeAdapter
 
 
 class NavigationAdapter(context: Context, var todoLists: ArrayList<String>, var activeTodoListIndex: Int)
-    : ArraySwipeAdapter<String>(context, R.layout.navigation_list, todoLists) {
+    : ArraySwipeAdapter<String>(context, R.layout.navigation_list_item, todoLists) {
 
     override fun getCount(): Int {
         return todoLists.size
@@ -33,7 +33,7 @@ class NavigationAdapter(context: Context, var todoLists: ArrayList<String>, var 
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val v = LayoutInflater.from(context).inflate(R.layout.navigation_list, parent, false)
+        val v = LayoutInflater.from(context).inflate(R.layout.navigation_list_item, parent, false)
         v.findViewById<TextView>(R.id.todo_list_item).text = getItem(position)
 
         val swipeLayout = v.findViewById<SwipeLayout>(getSwipeLayoutResourceId(position))

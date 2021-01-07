@@ -63,17 +63,28 @@
 
         </androidx.appcompat.widget.Toolbar>
 
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/add_task_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
-            android:hint="Title"
-            android:padding="15dp"
             android:textColorHint="#99ECECEC"
-            android:textSize="18sp"
+            android:background="@drawable/textinputlayout_background"
+            app:boxBackgroundMode="none"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/add_task_toolbar" />
+            app:layout_constraintTop_toBottomOf="@+id/add_task_toolbar">
+
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/add_task_title_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:hint="Title"
+                android:textColor="@color/light"
+                android:padding="15dp"
+                android:textSize="18sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <EditText
             android:id="@+id/add_task_category"
@@ -157,6 +168,7 @@
         </LinearLayout>
 
         <EditText
+            android:id="@+id/add_task_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"

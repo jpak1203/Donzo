@@ -1,6 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<com.daimajia.swipe.SwipeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/todo_swipe"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:id="@+id/trash_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#C3524C"
+        android:padding="15dp"
+        android:gravity="start" >
+        <ImageView
+            android:id="@+id/trash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_delete_24" />
+    </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/archive_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#C4A44E"
+        android:padding="15dp"
+        android:gravity="end" >
+        <ImageView
+            android:id="@+id/archive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_archive_24" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="15dp"
+        android:background="@color/sidemenu" >
+        <ListView
+            android:id="@+id/todo_list_category"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="@color/light" />
+    </LinearLayout>
+</com.daimajia.swipe.SwipeLayout>

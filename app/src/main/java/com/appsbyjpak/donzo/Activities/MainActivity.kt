@@ -21,16 +21,19 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.appsbyjpak.donzo.Activities.AddTaskActivity
 import com.appsbyjpak.donzo.Adapters.NavigationAdapter
+import com.appsbyjpak.donzo.Adapters.TodoListAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class MainActivity : AppCompatActivity() {
 
+    val REQ_CODE_ADD_VIEW = 0
     private lateinit var mDrawerLayout: DrawerLayout
     private lateinit var navigationTodoLists: ListView
     private lateinit var closeDrawerButton: ImageView
     private lateinit var addTodoListItem: EditText
     private lateinit var addTodoListButton: Button
+    private lateinit var todoItemsLinearLayout: LinearLayout
     var todoLists = ArrayList<String>()
     var todoListAdapter: NavigationAdapter? = null
     var position = 0
@@ -106,10 +109,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        todoItemsLinearLayout = findViewById<LinearLayout>(R.id.todo_items)
+
         var fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
             val myIntent = Intent(this, AddTaskActivity::class.java)
-            startActivity(myIntent)
+            startActivityForResult(myIntent, REQ_CODE_ADD_VIEW, null);
         }
 
     }
@@ -147,6 +152,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return super.dispatchTouchEvent(ev)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQ_CODE_ADD_VIEW) {
+                val taskTitle = data?.getStringExtra("taskTitle")
+                val taskCategory = data?.getStringExtra("taskCategory")
+
+                val taskItemTitles = arrayListOf(taskTitle)
+                val todoItemListView = ListView(this)
+                val todoItemListAdapter = TodoListAdapter(this, taskItemTitles, 0)
+                todoItemListView.adapter = todoItemListAdapter
+
+                todoItemsLinearLayout.addView(todoItemListView, 0)
+            }
+        }
     }
 
     private fun showKeyboard() {
