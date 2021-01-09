@@ -14,7 +14,7 @@ import com.daimajia.swipe.adapters.ArraySwipeAdapter
 
 
 class TodoListAdapter(context: Context, var todoLists: ArrayList<String?>, var todoItems: Int)
-    : ArraySwipeAdapter<String>(context, R.layout.navigation_list_item, todoLists) {
+    : ArraySwipeAdapter<String>(context, R.layout.todo_list_category_view, todoLists) {
 
     override fun getCount(): Int {
         return todoLists.size
@@ -44,11 +44,6 @@ class TodoListAdapter(context: Context, var todoLists: ArrayList<String?>, var t
         swipingDrawerItems(swipeLayout, position)
 
         return v
-    }
-
-    // Sets the View as Selected
-    private fun setAsSelected(v: SwipeLayout) {
-        v.surfaceView.setBackgroundColor(Color.parseColor("#1f1f1f"))
     }
 
     // Delete & Archive functionality for Nav Drawer Lists

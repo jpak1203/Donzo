@@ -2,12 +2,10 @@ package com.appsbyjpak.donzo
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
-import android.view.Menu
-import android.view.MenuItem
-import android.view.MotionEvent
+import android.view.*
 import android.view.View.GONE
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -17,7 +15,9 @@ import android.widget.AdapterView.VISIBLE
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
+import androidx.core.view.setPadding
 import androidx.drawerlayout.widget.DrawerLayout
 import com.appsbyjpak.donzo.Activities.AddTaskActivity
 import com.appsbyjpak.donzo.Adapters.NavigationAdapter
@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var addTodoListItem: EditText
     private lateinit var addTodoListButton: Button
     private lateinit var todoItemsLinearLayout: LinearLayout
+    var hashOfTodoListItems: HashMap<Int, ArrayList<String?>> = HashMap()
     var todoLists = ArrayList<String>()
     var todoListAdapter: NavigationAdapter? = null
     var position = 0
@@ -89,8 +90,8 @@ class MainActivity : AppCompatActivity() {
             ).toString()
         }
 
-        addTodoListButton = findViewById<Button>(R.id.add_new_list_button)
-        addTodoListItem = findViewById<EditText>(R.id.add_todo_list_item)
+        addTodoListButton = findViewById(R.id.add_new_list_button)
+        addTodoListItem = findViewById(R.id.add_todo_list_item)
         addTodoListButton.setOnClickListener {
             addTodoListItem.visibility = VISIBLE
             addTodoListItem.requestFocus()
@@ -159,14 +160,42 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == RESULT_OK) {
             if (requestCode == REQ_CODE_ADD_VIEW) {
                 val taskTitle = data?.getStringExtra("taskTitle")
-                val taskCategory = data?.getStringExtra("taskCategory")
+                var taskCategory = data?.getStringExtra("taskCategory")
+                if (taskCategory?.isEmpty() == true) taskCategory = "Uncategorized"
 
-                val taskItemTitles = arrayListOf(taskTitle)
-                val todoItemListView = ListView(this)
-                val todoItemListAdapter = TodoListAdapter(this, taskItemTitles, 0)
-                todoItemListView.adapter = todoItemListAdapter
+                var taskItemTitles = arrayListOf<String?>()
+                var todoItemListView = findViewById<ListView>(taskCategory.hashCode())
 
-                todoItemsLinearLayout.addView(todoItemListView, 0)
+                Log.d("LIST", (todoItemListView == null).toString())
+                if (todoItemListView == null) {
+                    val colorArray = resources.getStringArray(R.array.todo_colors)
+                    val color = Color.parseColor(colorArray[(0..2).random()])
+
+                    taskItemTitles.add(taskTitle.toString())
+                    todoItemListView = ListView(this)
+                    todoItemListView.id = taskCategory.hashCode()
+
+                    hashOfTodoListItems[taskCategory.hashCode()] = taskItemTitles
+
+                    val todoItemListCategory = TextView(this)
+                    todoItemListCategory.text = taskCategory
+                    todoItemListCategory.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                    todoItemListCategory.gravity = Gravity.CENTER
+                    todoItemListCategory.setTextColor(ContextCompat.getColor(this, R.color.light))
+                    todoItemListCategory.setPadding(10)
+                    todoItemListCategory.setBackgroundColor(color)
+                    todoItemListView.addHeaderView(todoItemListCategory)
+
+                    val todoItemListAdapter = TodoListAdapter(this, taskItemTitles, 0)
+                    todoItemListView.adapter = todoItemListAdapter
+                    todoItemsLinearLayout.addView(todoItemListView, 0)
+                } else {
+                    hashOfTodoListItems[taskCategory.hashCode()]?.add(taskTitle)
+                    taskItemTitles = hashOfTodoListItems[taskCategory.hashCode()]!!
+                    val todoItemListAdapter = TodoListAdapter(this, taskItemTitles, 0)
+                    todoItemListView.adapter = todoItemListAdapter
+                    todoItemListAdapter.notifyDataSetChanged()
+                }
             }
         }
     }

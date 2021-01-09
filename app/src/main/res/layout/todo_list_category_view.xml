@@ -35,8 +35,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="15dp"
-        android:background="@color/sidemenu" >
+        android:padding="15dp" >
+
         <ListView
             android:id="@+id/todo_list_category"
             android:layout_width="match_parent"
