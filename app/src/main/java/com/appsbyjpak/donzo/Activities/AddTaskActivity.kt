@@ -7,9 +7,9 @@ import android.os.Looper
 import android.text.TextUtils
 import android.view.View
 import android.widget.*
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.appsbyjpak.donzo.R
-import com.daimajia.swipe.SwipeLayout
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
@@ -21,7 +21,7 @@ class AddTaskActivity : AppCompatActivity() {
     private lateinit var listSpinner: Spinner
     private lateinit var taskTitleLayout: TextInputLayout
     private lateinit var taskTitleInput: TextInputEditText
-    private lateinit var taskCategory: EditText
+    private lateinit var taskCategory: AutoCompleteTextView
     private lateinit var taskDescription: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +49,11 @@ class AddTaskActivity : AppCompatActivity() {
         taskTitleLayout = findViewById(R.id.add_task_title)
         taskTitleInput = findViewById(R.id.add_task_title_input)
         taskCategory = findViewById(R.id.add_task_category)
+
+        val autoCategories = arrayListOf("category1", "category2", "category3", "hi", "yo")
+        val adapter: ArrayAdapter<String> = ArrayAdapter<String>(this,
+                android.R.layout.simple_dropdown_item_1line, autoCategories)
+        taskCategory.setAdapter(adapter)
 
         val repeatCheckbox = findViewById<CheckBox>(R.id.add_task_repeat_checkbox)
         val repeatSelector = findViewById<LinearLayout>(R.id.repeat_selector_layout)

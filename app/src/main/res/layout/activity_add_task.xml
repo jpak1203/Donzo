@@ -82,14 +82,17 @@
                 android:hint="Title"
                 android:textColor="@color/light"
                 android:maxLines="1"
+                android:lines="1"
+                android:singleLine="true"
+                android:inputType="text"
                 android:padding="15dp"
                 android:textSize="18sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/add_task_category"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@null"
             android:hint="Category"
@@ -99,6 +102,11 @@
             android:textSize="14sp"
             android:textColor="@color/light"
             android:maxLines="1"
+            android:lines="1"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
+            android:inputType="text"
+            android:dropDownWidth="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/add_task_title" />
 
