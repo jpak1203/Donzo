@@ -68,7 +68,7 @@
                 android:layout_marginRight="25dp" />
 
             <ListView
-                android:id="@+id/lst_menu_items"
+                android:id="@+id/list_menu_items"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />

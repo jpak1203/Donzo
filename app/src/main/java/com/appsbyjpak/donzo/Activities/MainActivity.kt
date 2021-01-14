@@ -3,6 +3,8 @@ package com.appsbyjpak.donzo
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -34,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var addTodoListItem: EditText
     private lateinit var addTodoListButton: Button
     private lateinit var todoItemsLinearLayout: LinearLayout
+
     var hashOfTodoListItems: HashMap<Int, ArrayList<String?>> = HashMap()
     var todoLists = ArrayList<String>()
     var todoListAdapter: NavigationAdapter? = null
@@ -165,36 +168,55 @@ class MainActivity : AppCompatActivity() {
 
                 var taskItemTitles = arrayListOf<String?>()
                 var todoItemListView = findViewById<ListView>(taskCategory.hashCode())
+                val colorArray = resources.getStringArray(R.array.todo_colors)
+                var color = Color.parseColor(colorArray[(0..2).random()])
 
                 Log.d("LIST", (todoItemListView == null).toString())
                 if (todoItemListView == null) {
-                    val colorArray = resources.getStringArray(R.array.todo_colors)
-                    val color = Color.parseColor(colorArray[(0..2).random()])
-
                     taskItemTitles.add(taskTitle.toString())
+
                     todoItemListView = ListView(this)
                     todoItemListView.id = taskCategory.hashCode()
 
                     hashOfTodoListItems[taskCategory.hashCode()] = taskItemTitles
 
                     val todoItemListCategory = TextView(this)
+                    todoItemListCategory.id = taskCategory.hashCode() + "header".hashCode()
                     todoItemListCategory.text = taskCategory
-                    todoItemListCategory.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                    todoItemListCategory.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
                     todoItemListCategory.gravity = Gravity.CENTER
                     todoItemListCategory.setTextColor(ContextCompat.getColor(this, R.color.light))
                     todoItemListCategory.setPadding(10)
                     todoItemListCategory.setBackgroundColor(color)
-                    todoItemListView.addHeaderView(todoItemListCategory)
+                    todoItemListView.addHeaderView(todoItemListCategory, null, false)
 
-                    val todoItemListAdapter = TodoListAdapter(this, taskItemTitles, 0)
+                    val todoItemListAdapter = TodoListAdapter(this, taskItemTitles, color)
                     todoItemListView.adapter = todoItemListAdapter
                     todoItemsLinearLayout.addView(todoItemListView, 0)
                 } else {
                     hashOfTodoListItems[taskCategory.hashCode()]?.add(taskTitle)
                     taskItemTitles = hashOfTodoListItems[taskCategory.hashCode()]!!
-                    val todoItemListAdapter = TodoListAdapter(this, taskItemTitles, 0)
+                    color = (todoItemListView.findViewById<TextView>(taskCategory.hashCode() + "header".hashCode()).background as ColorDrawable).color
+                    val todoItemListAdapter = TodoListAdapter(this, taskItemTitles, color)
                     todoItemListView.adapter = todoItemListAdapter
                     todoItemListAdapter.notifyDataSetChanged()
+                }
+
+                todoItemListView.setOnItemClickListener { _, view, _, _ ->
+                    if (view.background == null || (view.background as ColorDrawable).color == Color.TRANSPARENT) {
+                        view.setBackgroundColor(color)
+                        view.background.alpha = 30
+                        view.findViewById<TextView>(R.id.todo_list_category).apply {
+                            paintFlags = paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                        }
+                    }
+                    else {
+                        view.setBackgroundColor(Color.TRANSPARENT)
+                        view.findViewById<TextView>(R.id.todo_list_category).apply {
+                            paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                        }
+                    }
+                    Log.d("BACKGROUND", view.background.toString())
                 }
             }
         }
