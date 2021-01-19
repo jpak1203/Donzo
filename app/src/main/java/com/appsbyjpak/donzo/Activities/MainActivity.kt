@@ -25,6 +25,10 @@ import com.appsbyjpak.donzo.Activities.AddTaskActivity
 import com.appsbyjpak.donzo.Adapters.NavigationAdapter
 import com.appsbyjpak.donzo.Adapters.TodoListAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import java.time.LocalDateTime
 
 
 class MainActivity : AppCompatActivity() {
@@ -36,6 +40,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var addTodoListItem: EditText
     private lateinit var addTodoListButton: Button
     private lateinit var todoItemsLinearLayout: LinearLayout
+    private lateinit var toolbar: Toolbar
+    private lateinit var fab: FloatingActionButton
+    private val db = Firebase.firestore
 
     var hashOfTodoListItems: HashMap<Int, ArrayList<String?>> = HashMap()
     var todoLists = ArrayList<String>()
@@ -49,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         Log.d("AH", "" + savedInstanceState?.getInt("activeList"))
 
         // Custom Action bar
-        val toolbar: Toolbar = findViewById(R.id.main_todo_toolbar)
+        toolbar = findViewById(R.id.main_todo_toolbar)
         setSupportActionBar(toolbar)
 
         val actionbar: ActionBar? = supportActionBar
@@ -70,28 +77,40 @@ class MainActivity : AppCompatActivity() {
 
         navigationTodoLists = findViewById(R.id.nav_todo_lists)
 
-        todoLists = arrayListOf("TODO List 1", "TODO List 2")
-        todoListAdapter = NavigationAdapter(this, todoLists, 0)
+        val dbTodoListsArray = arrayListOf<String>()
+        db.collection("list").orderBy("timeStamp")
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    dbTodoListsArray.add(document.data["title"].toString())
+                    Log.d("list", "${document.id} => ${document.data}")
+                }
+                todoLists = dbTodoListsArray
+                todoListAdapter = NavigationAdapter(this, todoLists, 0)
 
-        navigationTodoLists.adapter = todoListAdapter
+                navigationTodoLists.adapter = todoListAdapter
 
-        //on first start -- set active list as the first list
-        navigationTodoLists.setItemChecked(position, true)
-        todoListAdapter?.notifyDataSetChanged()
-        toolbar.findViewById<TextView>(R.id.main_toolbar_title).text = navigationTodoLists.adapter.getItem(
-                0
-        ).toString()
+                //on first start -- set active list as the first list
+                navigationTodoLists.setItemChecked(position, true)
+                todoListAdapter?.notifyDataSetChanged()
+                toolbar.findViewById<TextView>(R.id.main_toolbar_title).text = navigationTodoLists.adapter.getItem(
+                    0
+                ).toString()
 
-        navigationTodoLists.onItemClickListener = OnItemClickListener { _, _, position, _ ->
-            this.position = position
-            navigationTodoLists.setItemChecked(position, true)
-            todoListAdapter?.activeTodoListIndex = position
-            todoListAdapter?.notifyDataSetChanged()
-            mDrawerLayout.closeDrawers()
-            toolbar.findViewById<TextView>(R.id.main_toolbar_title).text = navigationTodoLists.adapter.getItem(
-                    position
-            ).toString()
-        }
+                navigationTodoLists.onItemClickListener = OnItemClickListener { _, _, position, _ ->
+                    this.position = position
+                    navigationTodoLists.setItemChecked(position, true)
+                    todoListAdapter?.activeTodoListIndex = position
+                    todoListAdapter?.notifyDataSetChanged()
+                    mDrawerLayout.closeDrawers()
+                    toolbar.findViewById<TextView>(R.id.main_toolbar_title).text = navigationTodoLists.adapter.getItem(
+                        position
+                    ).toString()
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.w("list", "Error getting documents.", exception)
+            }
 
         addTodoListButton = findViewById(R.id.add_new_list_button)
         addTodoListItem = findViewById(R.id.add_todo_list_item)
@@ -102,7 +121,21 @@ class MainActivity : AppCompatActivity() {
             addTodoListItem.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     if (addTodoListItem.text.toString().isNotEmpty()) {
-                        todoLists?.add(addTodoListItem.text.toString())
+                        val todoList = hashMapOf(
+                            "title" to addTodoListItem.text.toString(),
+                            "archived" to false,
+                            "timeStamp" to Timestamp.now()
+                        )
+                        db.collection("list")
+                            .add(todoList)
+                            .addOnSuccessListener { documentReference ->
+                                Log.d("list", "DocumentSnapshot added with ID: ${documentReference.id}")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w("list", "Error adding document", e)
+                            }
+
+                        dbTodoListsArray.add(addTodoListItem.text.toString())
                         todoListAdapter?.notifyDataSetChanged()
                         addTodoListItem.visibility = GONE
                         addTodoListItem.text.clear()
@@ -113,9 +146,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        todoItemsLinearLayout = findViewById<LinearLayout>(R.id.todo_items)
+        todoItemsLinearLayout = findViewById(R.id.todo_items)
 
-        var fab = findViewById<FloatingActionButton>(R.id.fab)
+        fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
             val myIntent = Intent(this, AddTaskActivity::class.java)
             startActivityForResult(myIntent, REQ_CODE_ADD_VIEW, null);
