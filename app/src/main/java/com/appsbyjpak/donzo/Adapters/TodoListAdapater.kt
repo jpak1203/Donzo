@@ -13,14 +13,14 @@ import com.daimajia.swipe.SwipeLayout.SwipeListener
 import com.daimajia.swipe.adapters.ArraySwipeAdapter
 
 
-class NavigationAdapter(context: Context, var todoLists: ArrayList<String>, var activeTodoListIndex: Int)
-    : ArraySwipeAdapter<String>(context, R.layout.navigation_list_item, todoLists) {
+class TodoListAdapter(context: Context, var todoLists: ArrayList<String?>, var color: Int)
+    : ArraySwipeAdapter<String>(context, R.layout.todo_list_category_view, todoLists) {
 
     override fun getCount(): Int {
         return todoLists.size
     }
 
-    override fun getItem(position: Int): String {
+    override fun getItem(position: Int): String? {
         return todoLists[position]
     }
 
@@ -29,31 +29,24 @@ class NavigationAdapter(context: Context, var todoLists: ArrayList<String>, var 
     }
 
     override fun getSwipeLayoutResourceId(position: Int): Int {
-        return R.id.swipe
+        return R.id.todo_swipe
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val v = LayoutInflater.from(context).inflate(R.layout.navigation_list_item, parent, false)
-        v.findViewById<TextView>(R.id.todo_list_item).text = getItem(position)
+        val v = LayoutInflater.from(context).inflate(R.layout.todo_list_category_view, parent, false)
+        v.findViewById<TextView>(R.id.todo_list_category).text = getItem(position)
 
         val swipeLayout = v.findViewById<SwipeLayout>(getSwipeLayoutResourceId(position))
         swipeLayout.showMode = SwipeLayout.ShowMode.PullOut
         swipeLayout.addDrag(SwipeLayout.DragEdge.Left, v.findViewById(R.id.trash_wrapper))
         swipeLayout.addDrag(SwipeLayout.DragEdge.Right, v.findViewById(R.id.archive_wrapper))
 
-        if (position == activeTodoListIndex) {
-            swipeLayout.isSwipeEnabled = false
-            setAsSelected(swipeLayout)
-        } else {
-            swipingDrawerItems(swipeLayout, position)
-        }
+        v.setBackgroundColor(color)
+        v.background.alpha = 30
+
+        swipingDrawerItems(swipeLayout, position)
 
         return v
-    }
-
-    // Sets the View as Selected
-    private fun setAsSelected(v: SwipeLayout) {
-        v.surfaceView.setBackgroundColor(Color.parseColor("#1f1f1f"))
     }
 
     // Delete & Archive functionality for Nav Drawer Lists
@@ -104,4 +97,5 @@ class NavigationAdapter(context: Context, var todoLists: ArrayList<String>, var 
             }
         })
     }
+
 }

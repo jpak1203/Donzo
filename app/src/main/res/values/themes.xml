@@ -3,4 +3,9 @@
     <style name="Theme.Donzo" parent="Theme.MaterialComponents.Light.NoActionBar">
     </style>
 
+    <style name="Widget.MyApp.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
+        <item name="boxStrokeWidth">0dp</item>
+        <item name="boxStrokeWidthFocused">0dp</item>
+    </style>
+
 </resources>

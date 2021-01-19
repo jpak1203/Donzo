@@ -4,4 +4,17 @@
         <item>TODO List 1</item>
         <item>TODO List 2</item>
     </string-array>
+
+    <string-array name="durations">
+        <item>day(s)</item>
+        <item>week(s)</item>
+        <item>month(s)</item>
+        <item>year(s)</item>
+    </string-array>
+
+    <string-array name="todo_colors">
+        <item>#12A93C</item>
+        <item>#D732C6</item>
+        <item>#475DAA</item>
+    </string-array>
 </resources>

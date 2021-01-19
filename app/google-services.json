@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "97926868061",
+    "project_id": "donzo-c5b5f",
+    "storage_bucket": "donzo-c5b5f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:97926868061:android:1a50c23e654fd6b47271b4",
+        "android_client_info": {
+          "package_name": "com.appsbyjpak.donzo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "97926868061-fuaj3obfg5u4tf4acd3b3r359su99r9r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKXSbn8anHvXvUg6GMVeNCZEnkqvcPgmQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "97926868061-fuaj3obfg5u4tf4acd3b3r359su99r9r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
