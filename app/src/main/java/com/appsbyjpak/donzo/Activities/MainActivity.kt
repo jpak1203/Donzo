@@ -1,4 +1,4 @@
-package com.appsbyjpak.donzo
+package com.appsbyjpak.donzo.Activities
 
 import android.content.Context
 import android.content.Intent
@@ -24,6 +24,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.appsbyjpak.donzo.Activities.AddTaskActivity
 import com.appsbyjpak.donzo.Adapters.NavigationAdapter
 import com.appsbyjpak.donzo.Adapters.TodoListAdapter
+import com.appsbyjpak.donzo.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore

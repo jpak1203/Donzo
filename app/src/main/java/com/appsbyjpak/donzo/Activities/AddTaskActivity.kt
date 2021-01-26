@@ -10,7 +10,6 @@ import android.view.View
 import android.widget.*
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
-import com.appsbyjpak.donzo.Adapters.NavigationAdapter
 import com.appsbyjpak.donzo.R
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -74,7 +73,7 @@ class AddTaskActivity : AppCompatActivity() {
             }
 
         taskTitleLayout = findViewById(R.id.add_task_title)
-        taskTitleInput = findViewById(R.id.add_task_title_input)
+        taskTitleInput = findViewById(R.id.add_task_title)
         taskCategory = findViewById(R.id.add_task_category)
 
         val autoCategories = arrayListOf("category1", "category2", "category3", "hi", "yo")
