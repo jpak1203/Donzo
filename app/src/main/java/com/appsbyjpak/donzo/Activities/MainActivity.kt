@@ -1,4 +1,4 @@
-package com.appsbyjpak.donzo
+package com.appsbyjpak.donzo.Activities
 
 import android.content.Context
 import android.content.Intent
@@ -24,103 +24,209 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.appsbyjpak.donzo.Activities.AddTaskActivity
 import com.appsbyjpak.donzo.Adapters.NavigationAdapter
 import com.appsbyjpak.donzo.Adapters.TodoListAdapter
+import com.appsbyjpak.donzo.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 
 class MainActivity : AppCompatActivity() {
 
-    val REQ_CODE_ADD_VIEW = 0
+    private val REQ_CODE_ADD_VIEW = 0
     private lateinit var mDrawerLayout: DrawerLayout
     private lateinit var navigationTodoLists: ListView
     private lateinit var closeDrawerButton: ImageView
     private lateinit var addTodoListItem: EditText
     private lateinit var addTodoListButton: Button
     private lateinit var todoItemsLinearLayout: LinearLayout
+    private lateinit var toolbar: Toolbar
+    private lateinit var fab: FloatingActionButton
+    private val db = Firebase.firestore
+    private val lists = db.collection("list")
+    private val tasks = db.collection("task")
 
-    var hashOfTodoListItems: HashMap<Int, ArrayList<String?>> = HashMap()
+
+    private lateinit var taskTitle: String
+    private lateinit var taskCategory: String
+    private var mapOfTasks: HashMap<String, ArrayList<String?>> = HashMap()
+    private var todoItemListView: ListView? = null
+    private lateinit var  todoItemListAdapter: TodoListAdapter
+
     var todoLists = ArrayList<String>()
     var todoListAdapter: NavigationAdapter? = null
     var position = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        if (savedInstanceState?.getInt("activeList") != null) position = savedInstanceState.getInt("activeList")
-        Log.d("AH", "" + savedInstanceState?.getInt("activeList"))
 
-        // Custom Action bar
-        val toolbar: Toolbar = findViewById(R.id.main_todo_toolbar)
-        setSupportActionBar(toolbar)
-
-        val actionbar: ActionBar? = supportActionBar
-        actionbar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setHomeAsUpIndicator(R.drawable.ic_baseline_menu_24)
-            setDisplayShowTitleEnabled(false)
-        }
-
-        // Navigation Menu
-        mDrawerLayout = findViewById(R.id.drawer_layout)
-        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-
-        closeDrawerButton = findViewById(R.id.close_drawer_button)
-        closeDrawerButton.setOnClickListener {
-            mDrawerLayout.closeDrawer(Gravity.LEFT)
-        }
-
-        navigationTodoLists = findViewById(R.id.nav_todo_lists)
-
-        todoLists = arrayListOf("TODO List 1", "TODO List 2")
-        todoListAdapter = NavigationAdapter(this, todoLists, 0)
-
-        navigationTodoLists.adapter = todoListAdapter
-
-        //on first start -- set active list as the first list
-        navigationTodoLists.setItemChecked(position, true)
-        todoListAdapter?.notifyDataSetChanged()
-        toolbar.findViewById<TextView>(R.id.main_toolbar_title).text = navigationTodoLists.adapter.getItem(
-                0
-        ).toString()
-
-        navigationTodoLists.onItemClickListener = OnItemClickListener { _, _, position, _ ->
-            this.position = position
-            navigationTodoLists.setItemChecked(position, true)
-            todoListAdapter?.activeTodoListIndex = position
-            todoListAdapter?.notifyDataSetChanged()
-            mDrawerLayout.closeDrawers()
-            toolbar.findViewById<TextView>(R.id.main_toolbar_title).text = navigationTodoLists.adapter.getItem(
-                    position
-            ).toString()
-        }
-
-        addTodoListButton = findViewById(R.id.add_new_list_button)
-        addTodoListItem = findViewById(R.id.add_todo_list_item)
-        addTodoListButton.setOnClickListener {
-            addTodoListItem.visibility = VISIBLE
-            addTodoListItem.requestFocus()
-            showKeyboard()
-            addTodoListItem.setOnEditorActionListener { _, actionId, _ ->
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    if (addTodoListItem.text.toString().isNotEmpty()) {
-                        todoLists?.add(addTodoListItem.text.toString())
-                        todoListAdapter?.notifyDataSetChanged()
-                        addTodoListItem.visibility = GONE
-                        addTodoListItem.text.clear()
-                    }
-                    hideKeyboard()
+        val dbTodoListsArray = arrayListOf<String>()
+        lists.orderBy("timeStamp")
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    dbTodoListsArray.add(document.data["title"].toString())
+                    Log.d("list", "${document.id} => ${document.data}")
                 }
-                false
+                setContentView(R.layout.activity_main)
+
+                if (savedInstanceState?.getInt("activeList") != null) position = savedInstanceState.getInt("activeList")
+
+                // Custom Action bar
+                toolbar = findViewById(R.id.main_todo_toolbar)
+                setSupportActionBar(toolbar)
+
+                val actionbar: ActionBar? = supportActionBar
+                actionbar?.apply {
+                    setDisplayHomeAsUpEnabled(true)
+                    setHomeAsUpIndicator(R.drawable.ic_baseline_menu_24)
+                    setDisplayShowTitleEnabled(false)
+                }
+
+                // Navigation Menu
+                mDrawerLayout = findViewById(R.id.drawer_layout)
+                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+
+                closeDrawerButton = findViewById(R.id.close_drawer_button)
+                closeDrawerButton.setOnClickListener {
+                    mDrawerLayout.closeDrawer(Gravity.LEFT)
+                }
+
+                navigationTodoLists = findViewById(R.id.nav_todo_lists)
+
+                todoLists = dbTodoListsArray
+                todoListAdapter = NavigationAdapter(this, todoLists, 0)
+
+                navigationTodoLists.adapter = todoListAdapter
+
+                //on first start -- set active list as the first list
+                navigationTodoLists.setItemChecked(position, true)
+                todoListAdapter?.notifyDataSetChanged()
+                toolbar.findViewById<TextView>(R.id.main_toolbar_title).text = navigationTodoLists.adapter.getItem(
+                    0
+                ).toString()
+
+                navigationTodoLists.onItemClickListener = OnItemClickListener { _, _, position, _ ->
+                    this.position = position
+                    navigationTodoLists.setItemChecked(position, true)
+                    todoListAdapter?.activeTodoListIndex = position
+                    todoListAdapter?.notifyDataSetChanged()
+                    mDrawerLayout.closeDrawers()
+                    toolbar.findViewById<TextView>(R.id.main_toolbar_title).text = navigationTodoLists.adapter.getItem(
+                        position
+                    ).toString()
+                }
+
+                Log.d("list", toolbar.findViewById<TextView>(R.id.main_toolbar_title).text.toString())
+                lists.whereEqualTo("title", toolbar.findViewById<TextView>(R.id.main_toolbar_title).text.toString())
+                    .get()
+                    .addOnSuccessListener { result ->
+                        var listId = result.documents[0].reference
+                        todoItemsLinearLayout = findViewById(R.id.todo_items)
+                        tasks.whereEqualTo("list_id", listId)
+                            .get()
+                            .addOnSuccessListener { result ->
+                                for (document in result) {
+                                    Log.d("list", "${document.id} => ${document.data}")
+                                    taskTitle = document.data["title"].toString()
+                                    taskCategory = document.data["category"].toString()
+                                    if (taskCategory == "") taskCategory = "Uncategorized"
+
+                                    todoItemListView = findViewById(taskCategory.hashCode())
+
+                                    val colorArray = resources.getStringArray(R.array.todo_colors)
+                                    var color = Color.parseColor(colorArray[(0..2).random()])
+
+                                    if (todoItemListView == null) {
+                                        mapOfTasks[taskCategory] = arrayListOf(taskTitle)
+
+                                        todoItemListView = ListView(this)
+                                        todoItemListView?.id = taskCategory.hashCode()
+
+                                        val todoItemListCategory = TextView(this)
+                                        todoItemListCategory.id = taskCategory.hashCode() + "header".hashCode()
+                                        todoItemListCategory.text = taskCategory
+                                        todoItemListCategory.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                                        todoItemListCategory.gravity = Gravity.CENTER
+                                        todoItemListCategory.setTextColor(ContextCompat.getColor(this, R.color.light))
+                                        todoItemListCategory.setPadding(10)
+                                        todoItemListCategory.setBackgroundColor(color)
+                                        todoItemListView?.addHeaderView(todoItemListCategory, null, false)
+
+                                        todoItemListAdapter = TodoListAdapter(this, mapOfTasks[taskCategory]!!, color)
+                                        todoItemListView?.adapter = todoItemListAdapter
+                                        todoItemsLinearLayout.addView(todoItemListView, 0)
+                                    } else {
+                                        mapOfTasks[taskCategory]?.add(taskTitle)
+                                        color = (todoItemListView?.findViewById<TextView>(taskCategory.hashCode() + "header".hashCode())?.background as ColorDrawable).color
+                                        val todoItemListAdapter = TodoListAdapter(this, mapOfTasks[taskCategory]!!, color)
+                                        todoItemListView?.adapter = todoItemListAdapter
+                                        todoItemListAdapter.notifyDataSetChanged()
+                                    }
+
+                                    todoItemListView?.setOnItemClickListener { _, view, _, _ ->
+                                        if (view.background == null || (view.background as ColorDrawable).color == Color.TRANSPARENT) {
+                                            view.setBackgroundColor(color)
+                                            view.background.alpha = 30
+                                            view.findViewById<TextView>(R.id.todo_list_category).apply {
+                                                paintFlags = paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                                            }
+                                        }
+                                        else {
+                                            view.setBackgroundColor(Color.TRANSPARENT)
+                                            view.findViewById<TextView>(R.id.todo_list_category).apply {
+                                                paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                                            }
+                                        }
+                                        Log.d("BACKGROUND", view.background.toString())
+                                    }
+                                }
+                            }
+                    }
+
+                addTodoListButton = findViewById(R.id.add_new_list_button)
+                addTodoListItem = findViewById(R.id.add_todo_list_item)
+                addTodoListButton.setOnClickListener {
+                    addTodoListItem.visibility = VISIBLE
+                    addTodoListItem.requestFocus()
+                    showKeyboard()
+                    addTodoListItem.setOnEditorActionListener { _, actionId, _ ->
+                        if (actionId == EditorInfo.IME_ACTION_DONE) {
+                            if (addTodoListItem.text.toString().isNotEmpty()) {
+                                val todoList = hashMapOf(
+                                    "title" to addTodoListItem.text.toString(),
+                                    "archived" to false,
+                                    "timeStamp" to Timestamp.now()
+                                )
+                                lists.add(todoList)
+                                    .addOnSuccessListener { documentReference ->
+                                        Log.d("list", "DocumentSnapshot added with ID: ${documentReference.id}")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.w("list", "Error adding document", e)
+                                    }
+
+                                dbTodoListsArray.add(addTodoListItem.text.toString())
+                                todoListAdapter?.notifyDataSetChanged()
+                                addTodoListItem.visibility = GONE
+                                addTodoListItem.text.clear()
+                            }
+                            hideKeyboard()
+                        }
+                        false
+                    }
+                }
+
+                fab = findViewById(R.id.fab)
+                fab.setOnClickListener {
+                    val myIntent = Intent(this, AddTaskActivity::class.java)
+                    startActivityForResult(myIntent, REQ_CODE_ADD_VIEW, null);
+                }
+
             }
-        }
-
-        todoItemsLinearLayout = findViewById<LinearLayout>(R.id.todo_items)
-
-        var fab = findViewById<FloatingActionButton>(R.id.fab)
-        fab.setOnClickListener {
-            val myIntent = Intent(this, AddTaskActivity::class.java)
-            startActivityForResult(myIntent, REQ_CODE_ADD_VIEW, null);
-        }
-
+            .addOnFailureListener { exception ->
+                Log.w("list", "Error getting documents.", exception)
+            }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -158,66 +264,50 @@ class MainActivity : AppCompatActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) {
             if (requestCode == REQ_CODE_ADD_VIEW) {
-                val taskTitle = data?.getStringExtra("taskTitle")
-                var taskCategory = data?.getStringExtra("taskCategory")
-                if (taskCategory?.isEmpty() == true) taskCategory = "Uncategorized"
+                val listId = lists.document(data?.getStringExtra("listId").toString())
 
-                var taskItemTitles = arrayListOf<String?>()
-                var todoItemListView = findViewById<ListView>(taskCategory.hashCode())
-                val colorArray = resources.getStringArray(R.array.todo_colors)
-                var color = Color.parseColor(colorArray[(0..2).random()])
+                tasks.whereEqualTo("list_id", listId)
+                    .get()
+                    .addOnSuccessListener { result ->
+                        for (document in result) {
+                            taskTitle = document.data["title"].toString()
+                            taskCategory = document.data["category"].toString()
+                            if (taskCategory == "") taskCategory = "Uncategorized"
 
-                Log.d("LIST", (todoItemListView == null).toString())
-                if (todoItemListView == null) {
-                    taskItemTitles.add(taskTitle.toString())
+                            val colorArray = resources.getStringArray(R.array.todo_colors)
+                            var color = Color.parseColor(colorArray[(0..2).random()])
 
-                    todoItemListView = ListView(this)
-                    todoItemListView.id = taskCategory.hashCode()
+                            todoItemListView = findViewById(taskCategory.hashCode())
+                            if (todoItemListView == null) {
+                                mapOfTasks[taskCategory] = arrayListOf(taskTitle)
 
-                    hashOfTodoListItems[taskCategory.hashCode()] = taskItemTitles
+                                todoItemListView = ListView(this)
+                                todoItemListView?.id = taskCategory.hashCode()
 
-                    val todoItemListCategory = TextView(this)
-                    todoItemListCategory.id = taskCategory.hashCode() + "header".hashCode()
-                    todoItemListCategory.text = taskCategory
-                    todoItemListCategory.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-                    todoItemListCategory.gravity = Gravity.CENTER
-                    todoItemListCategory.setTextColor(ContextCompat.getColor(this, R.color.light))
-                    todoItemListCategory.setPadding(10)
-                    todoItemListCategory.setBackgroundColor(color)
-                    todoItemListView.addHeaderView(todoItemListCategory, null, false)
+                                val todoItemListCategory = TextView(this)
+                                todoItemListCategory.id = taskCategory.hashCode() + "header".hashCode()
+                                todoItemListCategory.text = taskCategory
+                                todoItemListCategory.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                                todoItemListCategory.gravity = Gravity.CENTER
+                                todoItemListCategory.setTextColor(ContextCompat.getColor(this, R.color.light))
+                                todoItemListCategory.setPadding(10)
+                                todoItemListCategory.setBackgroundColor(color)
+                                todoItemListView?.addHeaderView(todoItemListCategory, null, false)
 
-                    val todoItemListAdapter = TodoListAdapter(this, taskItemTitles, color)
-                    todoItemListView.adapter = todoItemListAdapter
-                    todoItemsLinearLayout.addView(todoItemListView, 0)
-                } else {
-                    hashOfTodoListItems[taskCategory.hashCode()]?.add(taskTitle)
-                    taskItemTitles = hashOfTodoListItems[taskCategory.hashCode()]!!
-                    color = (todoItemListView.findViewById<TextView>(taskCategory.hashCode() + "header".hashCode()).background as ColorDrawable).color
-                    val todoItemListAdapter = TodoListAdapter(this, taskItemTitles, color)
-                    todoItemListView.adapter = todoItemListAdapter
-                    todoItemListAdapter.notifyDataSetChanged()
-                }
-
-                todoItemListView.setOnItemClickListener { _, view, _, _ ->
-                    if (view.background == null || (view.background as ColorDrawable).color == Color.TRANSPARENT) {
-                        view.setBackgroundColor(color)
-                        view.background.alpha = 30
-                        view.findViewById<TextView>(R.id.todo_list_category).apply {
-                            paintFlags = paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                                todoItemListAdapter = TodoListAdapter(this, mapOfTasks[taskCategory]!!, color)
+                                todoItemListView?.adapter = todoItemListAdapter
+                                todoItemsLinearLayout.addView(todoItemListView, 0)
+                            } else {
+                                if (!mapOfTasks[taskCategory]!!.contains(taskTitle)) mapOfTasks[taskCategory]?.add(taskTitle)
+                                todoItemListAdapter.notifyDataSetChanged()
+                            }
                         }
                     }
-                    else {
-                        view.setBackgroundColor(Color.TRANSPARENT)
-                        view.findViewById<TextView>(R.id.todo_list_category).apply {
-                            paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                        }
-                    }
-                    Log.d("BACKGROUND", view.background.toString())
-                }
             }
         }
     }

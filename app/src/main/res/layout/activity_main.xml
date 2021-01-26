@@ -30,7 +30,7 @@
                 android:id="@+id/main_toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Toolbar Title"
+                android:text=""
                 android:layout_gravity="start"
                 android:textColor="@color/light"
                 android:textSize="18sp" />
