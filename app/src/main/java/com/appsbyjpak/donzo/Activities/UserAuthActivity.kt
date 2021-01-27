@@ -1,5 +1,6 @@
 package com.appsbyjpak.donzo.Activities
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.viewpager.widget.ViewPager
@@ -7,8 +8,11 @@ import com.appsbyjpak.donzo.Adapters.UserAuthAdapter
 import com.appsbyjpak.donzo.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.auth.FirebaseAuth
 
 class UserAuthActivity : AppCompatActivity() {
+
+    private lateinit var mAuth: FirebaseAuth
 
     lateinit var tabLayout: TabLayout
     lateinit var viewPager: ViewPager
@@ -16,10 +20,15 @@ class UserAuthActivity : AppCompatActivity() {
     lateinit var fb: FloatingActionButton
     var v = 0f
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_auth)
+
+        mAuth = FirebaseAuth.getInstance()
+        if (mAuth.currentUser != null) {
+            val myIntent = Intent(this, MainActivity::class.java)
+            startActivity(myIntent)
+        }
 
         tabLayout = findViewById(R.id.user_auth_tab_layout)
         viewPager = findViewById(R.id.user_auth_view_pager)

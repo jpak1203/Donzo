@@ -27,11 +27,14 @@ import com.appsbyjpak.donzo.Adapters.TodoListAdapter
 import com.appsbyjpak.donzo.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var mAuth: FirebaseAuth
 
     private val REQ_CODE_ADD_VIEW = 0
     private lateinit var mDrawerLayout: DrawerLayout
@@ -46,7 +49,6 @@ class MainActivity : AppCompatActivity() {
     private val lists = db.collection("list")
     private val tasks = db.collection("task")
 
-
     private lateinit var taskTitle: String
     private lateinit var taskCategory: String
     private var mapOfTasks: HashMap<String, ArrayList<String?>> = HashMap()
@@ -59,6 +61,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        mAuth = FirebaseAuth.getInstance()
+        Log.d("user_auth", "logged in user: " + mAuth.currentUser?.email.toString())
 
         val dbTodoListsArray = arrayListOf<String>()
         lists.orderBy("timeStamp")
@@ -220,7 +225,7 @@ class MainActivity : AppCompatActivity() {
                 fab = findViewById(R.id.fab)
                 fab.setOnClickListener {
                     val myIntent = Intent(this, AddTaskActivity::class.java)
-                    startActivityForResult(myIntent, REQ_CODE_ADD_VIEW, null);
+                    startActivityForResult(myIntent, REQ_CODE_ADD_VIEW, null)
                 }
 
             }
