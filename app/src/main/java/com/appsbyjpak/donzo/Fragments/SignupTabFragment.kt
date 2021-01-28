@@ -18,7 +18,10 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.appsbyjpak.donzo.Activities.MainActivity
 import com.appsbyjpak.donzo.R
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -26,6 +29,9 @@ import java.util.regex.Pattern
 class SignupTabFragment : Fragment() {
 
     private lateinit var mAuth: FirebaseAuth
+    private val db = Firebase.firestore
+    private val users = db.collection("users")
+    private val lists = db.collection("list")
 
     lateinit var email: EditText
     lateinit var password: EditText
@@ -78,8 +84,8 @@ class SignupTabFragment : Fragment() {
             if (task.isSuccessful) {
                 // Sign in success, update UI with the signed-in user's information
                 Log.d("Authentication", "createUserWithEmail:success")
-                val intent = Intent(context, MainActivity::class.java)
-                startActivity(intent)
+                val userId = mAuth.currentUser?.uid
+                createDefaultListForNewUser(userId)
             } else {
                 // If sign in fails, display a message to the user.
                 Log.w("Authentication", "createUserWithEmail:failure", task.exception)
@@ -95,6 +101,24 @@ class SignupTabFragment : Fragment() {
         signupButton.setOnClickListener {
             createAccount()
         }
+    }
+
+    private fun createDefaultListForNewUser(userId: String?) {
+        val todoList = hashMapOf(
+            "title" to "Default",
+            "archived" to false,
+            "timeStamp" to Timestamp.now(),
+            "userId" to userId
+        )
+        lists.add(todoList)
+            .addOnSuccessListener { documentReference ->
+                Log.d("list", "DocumentSnapshot added with ID: ${documentReference.id}")
+                val intent = Intent(context, MainActivity::class.java)
+                startActivity(intent)
+            }
+            .addOnFailureListener { e ->
+                Log.w("list", "Error adding document", e)
+            }
     }
 
     private fun validateForm(): Boolean {

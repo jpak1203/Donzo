@@ -73,22 +73,20 @@ class LoginTabFragment : Fragment() {
     private fun login() {
         if (!validateForm()) return
 
-        loginButton.setOnClickListener {
-            mAuth.signInWithEmailAndPassword(email.text.toString(), password.text.toString())
-                .addOnCompleteListener(requireActivity()) { task ->
-                    if (task.isSuccessful) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d("user_auth", "signInWithEmail:success")
-                        val myIntent = Intent(context, MainActivity::class.java)
-                        startActivity(myIntent)
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        Log.w("user_auth", "signInWithEmail:failure", task.exception)
-                        Toast.makeText(requireActivity(), "Authentication failed.", Toast.LENGTH_SHORT).show()
-                        userAuthFailed.visibility = TextView.VISIBLE
-                    }
+        mAuth.signInWithEmailAndPassword(email.text.toString(), password.text.toString())
+            .addOnCompleteListener(requireActivity()) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d("user_auth", "signInWithEmail:success")
+                    val myIntent = Intent(context, MainActivity::class.java)
+                    startActivity(myIntent)
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w("user_auth", "signInWithEmail:failure", task.exception)
+                    Toast.makeText(requireActivity(), "Authentication failed.", Toast.LENGTH_SHORT).show()
+                    userAuthFailed.visibility = TextView.VISIBLE
                 }
-        }
+            }
     }
 
     private fun submitLogin() {

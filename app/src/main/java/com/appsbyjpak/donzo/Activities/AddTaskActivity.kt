@@ -73,7 +73,7 @@ class AddTaskActivity : AppCompatActivity() {
             }
 
         taskTitleLayout = findViewById(R.id.add_task_title)
-        taskTitleInput = findViewById(R.id.add_task_title)
+        taskTitleInput = findViewById(R.id.add_task_item)
         taskCategory = findViewById(R.id.add_task_category)
 
         val autoCategories = arrayListOf("category1", "category2", "category3", "hi", "yo")

@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
     private lateinit var fab: FloatingActionButton
     private val db = Firebase.firestore
+    private val user = db.collection("users")
     private val lists = db.collection("list")
     private val tasks = db.collection("task")
 
@@ -63,10 +64,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         mAuth = FirebaseAuth.getInstance()
+        val currentUser = mAuth.currentUser
         Log.d("user_auth", "logged in user: " + mAuth.currentUser?.email.toString())
 
         val dbTodoListsArray = arrayListOf<String>()
         lists.orderBy("timeStamp")
+            .whereEqualTo("userId", currentUser?.uid)
             .get()
             .addOnSuccessListener { result ->
                 for (document in result) {
@@ -124,6 +127,7 @@ class MainActivity : AppCompatActivity() {
 
                 Log.d("list", toolbar.findViewById<TextView>(R.id.main_toolbar_title).text.toString())
                 lists.whereEqualTo("title", toolbar.findViewById<TextView>(R.id.main_toolbar_title).text.toString())
+                    .whereEqualTo("userId", currentUser?.uid)
                     .get()
                     .addOnSuccessListener { result ->
                         var listId = result.documents[0].reference
@@ -201,7 +205,8 @@ class MainActivity : AppCompatActivity() {
                                 val todoList = hashMapOf(
                                     "title" to addTodoListItem.text.toString(),
                                     "archived" to false,
-                                    "timeStamp" to Timestamp.now()
+                                    "timeStamp" to Timestamp.now(),
+                                    "userId" to currentUser?.uid
                                 )
                                 lists.add(todoList)
                                     .addOnSuccessListener { documentReference ->
@@ -232,6 +237,8 @@ class MainActivity : AppCompatActivity() {
             .addOnFailureListener { exception ->
                 Log.w("list", "Error getting documents.", exception)
             }
+
+        mAuth.signOut()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
